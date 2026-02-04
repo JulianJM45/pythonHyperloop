@@ -18,7 +18,7 @@ v = 100
 mu_0 = 4 * np.pi * 1e-7
 sigma = 10.3e6
 
-L = 10  # magnet length
+L = 1  # magnet length
 N = 1000  # Number of points in the domain
 # l = 5  # magnet lengt
 d = 0.035  # rail width

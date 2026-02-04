@@ -15,7 +15,7 @@ v = 100
 mu_0 = 4 * np.pi * 1e-7
 sigma = 10.3e6
 
-L = 10  # magnet length
+L = 1  # magnet length
 d = 0.035  # rail width
 a = 0.1  # rail thickness
 g = 0.1  # air gap
