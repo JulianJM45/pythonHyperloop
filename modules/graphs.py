@@ -3,11 +3,17 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
+# set font type
+plt.rcParams["font.sans-serif"] = "cmss10"
+
+plt.rcParams["pdf.fonttype"] = 42
+plt.rcParams["svg.fonttype"] = "none"
+
 OUTPUT_FOLDER = "../../MA_thesis_typst/figures/"
 
 
 class Graph:
-    def __init__(self, width_cm=16.5, height_cm=None, fontsize=11):
+    def __init__(self, width_cm=15, height_cm=None, fontsize=9):
         self.width_cm = width_cm
         self.height_cm = height_cm if height_cm else width_cm * (9 / 16)
         self.fontsize = fontsize
@@ -106,6 +112,8 @@ class Graph:
         title=None,
         xlabel=None,
         ylabel=None,
+        yrotation=90,
+        yfontsize=None,
         ymin=None,
         ymax=None,
         xmin=None,
@@ -114,6 +122,9 @@ class Graph:
         output_folder=OUTPUT_FOLDER,
     ):
         plt.rcParams["font.family"] = "sans-serif"
+
+        if yfontsize is None:
+            yfontsize = self.fontsize
 
         if self.polar:
             self.ax.set_xticklabels(
@@ -134,7 +145,7 @@ class Graph:
             if xlabel:
                 plt.xlabel(xlabel, fontsize=self.fontsize)
             if ylabel:
-                plt.ylabel(ylabel, fontsize=self.fontsize)
+                plt.ylabel(ylabel, fontsize=yfontsize, rotation=yrotation)
             plt.xticks(fontsize=self.fontsize)
             plt.yticks(fontsize=self.fontsize)
             plt.tick_params(
