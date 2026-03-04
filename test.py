@@ -1,11 +1,7 @@
 # %%
-import numpy as np
 
-n = np.arange(1, 1000001)
+from matplotlib import font_manager
 
-
-def c(n):
-    return 4 / (np.pi * (2 * n - 1)) * np.sin((2 * n - 1) * np.pi / 2)
-
-
-print(np.sum(c(n) ** 2))
+for f in font_manager.fontManager.ttflist:
+    # if "NewCM" in f.name:
+    print(f.name)

@@ -1,15 +1,50 @@
+# %%
+
+import sys
 from functools import reduce
 
 import numpy as np
 import pandas as pd
 from scipy.optimize import curve_fit
 
-from .graphs import Graph
+sys.path.insert(0, "..")
+from modules.graphs import Graph
 
-working_directory = "../../Simulation_results/"
+working_directory_mx = "../../Simulation_results/Maxwell/"
+working_directory_mc = "../../Simulation_results/Mechanical/"
+
+# %%
 
 
-def load_data(file_names, working_directory=working_directory):
+def load_data2D(file_name, workdir=working_directory_mc, aggfunc="mean"):
+    cols = ["Velocity [m/s]", "X [m]", "Y [m]", "Mag_B [tesla]"]
+    vcol, xcol, ycol, bcol = cols
+    df = pd.read_csv(workdir + file_name, sep=",")  # may be changed to ;
+    velocities = df[vcol].unique()
+    grouped = df.groupby(vcol)
+    data = {v: group[[xcol, ycol, bcol]].copy() for v, group in grouped}
+    return data, velocities
+
+
+def load_data(file_name, workdir=working_directory_mx):
+    cols = ["Time [s]", "Distance [mm]", "Mag_B [tesla]"]
+    tcol, xcol, bcol = cols
+    df = pd.read_csv(workdir + file_name, sep=";")  # may be changed to ;
+    times = df[tcol].unique()
+    grouped = df.groupby(tcol)
+    data = {t: group[[xcol, bcol]].copy() for t, group in grouped}
+    return data, times
+
+
+# %%
+def load_multiple_data():
+    pass
+
+
+# %%
+
+
+def load_data_old(file_names, working_directory=working_directory_mx):
     # Track if input was a single string
     single_file = isinstance(file_names, str)
 
@@ -33,13 +68,13 @@ def load_data(file_names, working_directory=working_directory):
     return data, time_steps
 
 
-def load_data_transient(file_name, working_directory=working_directory):
+def load_data_transient(file_name, working_directory=working_directory_mx):
     df = pd.read_csv(working_directory + file_name, sep=",")
     time, force = df["Time [us]"].values, df["Force_x [mNewton]"].values
     return time, force
 
 
-def merge_csv_files(file_name1, file_name2, working_directory=working_directory):
+def merge_csv_files(file_name1, file_name2, working_directory=working_directory_mx):
     """
     Merge two CSV files together.
 
@@ -161,7 +196,7 @@ def fit_B1(data, time_step, B0, fitrange=[26, 68], x0=40, amp=0.036, a=0.2):
     dip_y = B0 - y0_fit
     b_increase = y0_fit + amp_fit - B0
 
-    print(f"Fitted parameters:")
+    print("Fitted parameters:")
     print(f"x0 = {x0_fit:.4f}")
     print(f"y0 = {y0_fit:.4f}")
     print(f"amp = {amp_fit:.4f}")

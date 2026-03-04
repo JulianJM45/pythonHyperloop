@@ -17,7 +17,7 @@ graph.plot_Graph(
     save=True,
     name="yam_long_force_x",
     # title="Breaking Force over Time",
-    xlabel="Time [μs]",
-    ylabel="Force_x [mN]",
+    xlabel="t [μs]",
+    ylabel="F_x [mN]",
     minorticks=True,
 )

@@ -9,33 +9,37 @@ from modules.graphs import Graph, get_plot_colors
 
 # %%
 # velocity
-v = 66.6
+v = 100
 
 # constants
 mu_0 = 4 * np.pi * 1e-7
-# sigma = 10.3e6
-sigma = 1e7
+sigma = 10.4e6
+# sigma = 1e7
 
-L = 2  # full magnet length
-d = 0.1  # half rail thickness
-a = 0.02  # half rail width
-g = 0.015  # air gap
+L = 0.135  # full magnet length
+d = 0.0005  # half rail thickness
+a = 0.005  # half rail width
+g = 0.001  # air gap
 
 k = mu_0 * sigma * d * v / g
 # print(f"K={k}")
 
-B0 = 1
+B0 = 0.62
 
 
 # %%
 def main():
-    # compare_velocities()
+    compare_velocities()
     # longitudinal_distribution()
     # lateral_distribution()
-    lift_f_length()
-    lift_f_width()
-    drag_f_length()
-    lift_drag_f_length()
+    # lift_f_length()
+    # lift_f_width()
+    # drag_f_length()
+    # lift_drag_f_length()
+    f_lift = F_a()
+    print(f"Liftforce = {f_lift}")
+    f_drag = F_b()
+    print(f"Dragforce = {f_drag}")
 
     pass
 
@@ -62,7 +66,7 @@ def longitudinal_distribution():
         graph.add_plot(x_array, b, color=color, label=f"y={y * 100} cm")
 
     graph.plot_Graph(
-        xlabel="x-Position (m)",
+        xlabel="x (m)",
         ylabel="Magnetic Field (T)",
         legend=True,
         save=True,
@@ -195,25 +199,26 @@ def lift_drag_f_length():
 
 
 def compare_velocities():
-    graph = Graph()
+    # graph = Graph()
+    graph = Graph(width_cm=7.5)
     x_array = np.linspace(-L, L, 10000)
 
-    velocities = [0, 30, 66.6, 100]
+    velocities = [100, 0]
     colors = get_plot_colors(len(velocities))
 
     for v, color in zip(velocities, colors):
         k = mu_0 * sigma * d * v / g
         print(f"K={k}")
         b = b_function(x_array, y=0, k=k)
-        graph.add_plot(x_array, b, color=color, label=f"v={v} m/s")
+        graph.add_plot(x_array * 100, b * 1000, color=color, label=f"v={v} m/s")
 
     graph.plot_Graph(
-        xlabel="x-Position (m)",
-        ylabel="Magnetic Field (T)",
+        xlabel="x (cm)",
+        ylabel="B (mT)",
         # title="Magnetic Field Profile along x axis",
         legend=True,
         save=True,
-        name="Yamamura_org",
+        name="Yam_analytical_y10_small",
     )
 
 
@@ -223,7 +228,7 @@ def b0_function(x):
     Works with scalars and array-like inputs.
     """
     x_arr = np.asarray(x)
-    res = np.where((x_arr > -L / 2) & (x_arr < L / 2), 1, 0)
+    res = np.where((x_arr > -L / 2) & (x_arr < L / 2), B0, 0)
 
     # If input was a scalar return a Python int, otherwise return the array
     if res.shape == ():
@@ -352,7 +357,7 @@ def f(n, k, L, a=a):
     return 1 / (2 * L) * (addend1 + addend2 + addend3)
 
 
-def F_b(k, L, a=a, N=1000):
+def F_b(k=k, L=L, a=a, N=1000):
     n = np.arange(1, N + 1)
     f_a0 = F_a0(L)
     c_n = c(n)[:, np.newaxis]

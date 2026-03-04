@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # set font type
-plt.rcParams["font.sans-serif"] = "cmss10"
+plt.rcParams["font.family"] = "NewComputerModern"
+# plt.rcParams["font.family"] = "NewComputerModern Sans"
 
 plt.rcParams["pdf.fonttype"] = 42
 plt.rcParams["svg.fonttype"] = "none"
@@ -31,12 +32,16 @@ class Graph:
 
     def add_plot(self, x, y, label="", color="red", linewidth=1):
         if self.polar:
+            if self.ax is None:
+                self.ax = plt.subplot(111, projection="polar")
             self.ax.plot(x, y, label=label, color=color, linewidth=linewidth)
         else:
             plt.plot(x, y, label=label, color=color, linewidth=linewidth)
 
     def add_scatter(self, x, y, label="", marker="o", color="blue", s=1, zorder=1):
         if self.polar:
+            if self.ax is None:
+                self.ax = plt.subplot(111, projection="polar")
             self.ax.scatter(
                 x, y, label=label, marker=marker, s=s, color=color, zorder=zorder
             )
@@ -74,13 +79,40 @@ class Graph:
         plt.axvline(x=x, color=color, linestyle=linestyle, linewidth=linewidth)
         plt.text(x + 1, y, label, rotation=0, verticalalignment="bottom", color=color)
 
-    def add_colormap(
+    def tripcolor(
+        self,
+        X,
+        Y,
+        Z,
+        shading="flat",
+        cbarlabel=r"Magnetic Field (T)",
+        cmap=None,
+        vmin=None,
+        vmax=None,
+        norm=None,
+    ):
+        self.colormap = True
+        tpc = plt.tripcolor(
+            X,
+            Y,
+            Z,
+            shading=shading,
+            cmap=cmap,
+            vmin=vmin,
+            vmax=vmax,
+            norm=norm,
+        )
+        cbar = plt.colorbar(tpc)
+        cbar.ax.tick_params(labelsize=self.fontsize)
+        cbar.ax.set_title(cbarlabel, fontsize=self.fontsize)
+
+    def pcolormesh(
         self,
         Z,
         X,
         Y,
         cbarlabel=r"$\Delta$$S_{21}$\u2009(dB)",
-        cmap="hot_r",
+        cmap=None,
         equal_bounds=False,
         vmin=None,
         vmax=None,
@@ -88,7 +120,8 @@ class Graph:
         self.colormap = True
 
         if X.ndim == 1:
-            X, Y = np.meshgrid(np.unique(X), np.unique(Y))
+            X = np.unique(X)
+            Y = np.unique(Y)
 
         if vmin is None:
             vmin = np.min(Z)
@@ -98,7 +131,15 @@ class Graph:
             vmax_abs = np.max(np.abs(Z))
             vmin, vmax = -vmax_abs, vmax_abs
 
-        pcm = plt.pcolormesh(X, Y, Z, cmap=cmap, vmin=vmin, vmax=vmax)
+        pcm = plt.pcolormesh(
+            X,
+            Y,
+            Z,
+            cmap=cmap,
+            vmin=vmin,
+            vmax=vmax,
+            shading="auto",
+        )
         cbar = plt.colorbar(pcm)
         cbar.ax.tick_params(labelsize=self.fontsize)
         cbar.ax.set_title(cbarlabel, fontsize=self.fontsize)
@@ -121,12 +162,12 @@ class Graph:
         minorticks=False,
         output_folder=OUTPUT_FOLDER,
     ):
-        plt.rcParams["font.family"] = "sans-serif"
-
         if yfontsize is None:
             yfontsize = self.fontsize
 
         if self.polar:
+            if self.ax is None:
+                self.ax = plt.subplot(111, projection="polar")
             self.ax.set_xticklabels(
                 [
                     f"\u2001\u2001{xlabel} = 0°",
@@ -164,8 +205,12 @@ class Graph:
                 plt.ylim([ymin, ymax])
 
         if legend:
-            # plt.legend(loc="center left", bbox_to_anchor=(1, 0.5))
-            plt.legend(loc="best")
+            ax = self.ax if self.polar and self.ax is not None else plt.gca()
+            handles, labels = ax.get_legend_handles_labels()
+            has_labels = any(label and not label.startswith("_") for label in labels)
+            if has_labels:
+                # plt.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+                plt.legend(loc="best")
 
         if title:
             plt.title(title, loc="left")
@@ -218,7 +263,6 @@ def quick_plot(
     height_in = height_cm / 2.54
 
     plt.figure(figsize=(width_in, height_in), dpi=300)
-    plt.rcParams["font.family"] = "sans-serif"
 
     if title:
         plt.title(title)
